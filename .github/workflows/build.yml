@@ -1,0 +1,37 @@
+name: Python Çoklu Platform Derleme
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: Kodları İndir
+      uses: actions/checkout@v4
+
+    - name: Python Kurulumu
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'  # Windows'ta kullandığınız sürüm
+
+    - name: Bağımlılıkları Yükle
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: PyInstaller ile macOS için Derle
+      run: |
+        # macOS için icon.ico kullanılamaz; eğer icns dosyanız varsa --icon=icon.icns yapabilirsiniz.
+        # İkonunuz yoksa --icon parametresini tamamen silebilirsiniz.
+        pyinstaller --clean --noconfirm --onedir --windowed --name Reapsot main.py
+
+    - name: Çıktıyı Kaydet (Artifact)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Reapsot-macOS
+        path: dist/
